@@ -2,19 +2,23 @@ import { useState, useEffect } from "react";
 
 function App() {
     const [board, setBoard] = useState(Array(9).fill(''));
-    const [turn, setTurn] = useState('X');
+    const [turn, setTurn] = useState('O'); // Change this line so the player (O) goes first
     const [isWinner, setIsWinner] = useState(false);
     const [winner, setWinner] = useState("");
 
     const handleOnClick = (index) => {
-        playerMove(index)
+        if (!isWinner) {
+            playerMove(index)
+        }
     }
 
     const playerMove = (index) => {
-        const tempBoard = [...board]
-        tempBoard[index] = 'O'
-        setBoard(() => tempBoard)
-        setTurn('X')
+        if (board[index] == '') {
+            const tempBoard = [...board]
+            tempBoard[index] = 'O'
+            setBoard(() => tempBoard)
+            setTurn('X')
+        }
     }
 
     const checkWinner = (gameBoard) => {
@@ -106,24 +110,17 @@ function App() {
             setIsWinner(true);
             setWinner("It's a Draw");
         } else if (turn === "X") {
-            // AI makes a move
-            if (!board.includes('X')) {
-                let randomMove = Math.floor(Math.random() * 8) + 1;
+            // AI makes a move after the player plays
+            let bestMove = findBestMove(board);
+            if (bestMove !== -1) {
                 let tempBoard = [...board];
-                tempBoard[randomMove] = "X";
-                setBoard(tempBoard)
-                setTurn('O')
-            } else {
-                let bestMove = findBestMove(board);
-                if (bestMove !== -1) {
-                    let tempBoard = [...board];
-                    tempBoard[bestMove] = "X";
-                    setBoard(tempBoard);
-                    setTurn("O");
-                }
+                tempBoard[bestMove] = "X";
+                setBoard(tempBoard);
+                setTurn("O");
             }
         }
-    }, [turn]);
+    }, [turn, board]); // Make sure both `turn` and `board` are dependencies here
+    
 
     const handleRestart = () => {
         setWinner("")
@@ -134,10 +131,23 @@ function App() {
     
 
     return (
-        <div className="flex pt-20 items-center min-h-screen flex-col gap-4">
+        <div className="flex pt-40 items-center min-h-screen flex-col gap-4">
+            <div><p className="text-3xl font-bold pb-10">Human vs AI</p></div>
+            <div className="grid grid-cols-3 gap-2 bg-black rounded-lg p-2 font-bold">
+                {board.map((value, index) => (
+                    <div
+                        key={index}
+                        className="p-2 w-[7rem] h-[7rem] border bg-white text-center cursor-pointer" 
+                        onClick={() => handleOnClick(index)}
+                        
+                    >
+                        <p className="text-[4rem]">{value}</p>
+                    </div>
+                ))}
+            </div>
             {isWinner ? (
-                <div className=" bg-slate-300 w-[24rem] h-[10rem] flex justify-center items-center flex-col">
-                    <p>{winner}!</p>{" "}
+                <div className=" bg-slate-300 w-[16rem] h-[7rem] flex justify-center items-center flex-col gap-2">
+                    <p className="text-xl">{winner}!</p>{" "}
                     <button
                         className="bg-blue-400 px-4 py-1 font-bold"
                         onClick={handleRestart}
@@ -146,19 +156,8 @@ function App() {
                     </button>
                 </div>
             ) : (
-                <div className="h-[10rem]"></div>
+            <></>
             )}
-            <div className="grid grid-cols-3 gap-2 bg-black rounded-lg p-2">
-                {board.map((value, index) => (
-                    <div
-                        key={index}
-                        className="p-2 w-[7rem] h-[7rem] border bg-white text-center cursor-pointer" 
-                        onClick={() => handleOnClick(index)}
-                    >
-                        <p className="text-[4rem]">{value}</p>
-                    </div>
-                ))}
-            </div>
         </div>
     );
 }
