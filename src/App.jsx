@@ -6,28 +6,55 @@ function App() {
     const [isWinner, setIsWinner] = useState(false);
     const [winner, setWinner] = useState("");
 
+    const handleOnClick = (index) => {
+        playerMove(index)
+    }
 
-    const AI = (board) => {
-        const emptyCells = [];
-        for (let i = 0; i < board.length; i++) {
-            if (board[i] === '') {
-                emptyCells.push(i);
-            }
+    const playerMove = (index) => {
+        const tempBoard = [...board]
+        tempBoard[index] = 'O'
+        setBoard(() => tempBoard)
+        setTurn('X')
+    }
+
+    const checkWinner = (gameBoard) => {
+        if (!gameBoard.includes('')) {
+            return 'Y'
         }
-        const random = Math.floor(Math.random() * emptyCells.length);
-        board[emptyCells[random]] = 'O';  // AI plays 'O'
-        setBoard([...board]);  // Update state with a new board
-    };
 
-    
+        // horizontal win
+        if (gameBoard[0] == gameBoard[1] && gameBoard[1] === gameBoard[2] && gameBoard[0] != '') {
+            return gameBoard[0]
+        } else if (gameBoard[3] == gameBoard[4] && gameBoard[4] === gameBoard[5] && gameBoard[3] != '') {
+            return gameBoard[3]
+        } else if (gameBoard[6] == gameBoard[7] && gameBoard[7] === gameBoard[8] && gameBoard[6] != '') {
+            return gameBoard[6]
+        }
+
+        // vertical win
+        if (gameBoard[0] == gameBoard[3] && gameBoard[3] === gameBoard[6] && gameBoard[0] != '') {
+            return gameBoard[0]
+        } else if (gameBoard[1] == gameBoard[4] && gameBoard[4] === gameBoard[7] && gameBoard[1] != '') {
+            return gameBoard[1]
+        } else if (gameBoard[2] == gameBoard[5] && gameBoard[5] === gameBoard[8] && gameBoard[2] != '') {
+            return gameBoard[2]
+        }
+
+        // diagnal win 
+        if (gameBoard[0] == gameBoard[4] && gameBoard[4] === gameBoard[8] && gameBoard[0] != '') {
+            return gameBoard[0]
+        } else if (gameBoard[2] == gameBoard[4] && gameBoard[4] === gameBoard[6] && gameBoard[2] != '') {
+            return gameBoard[2]
+        }
+    }
 
     // Use useEffect to automatically call AI after player makes a move
     useEffect(() => {
-        if (turn === 'O' && !isWinner) {  // If it's AI's turn and there's no winner yet
-            AI([...board]);  // AI takes a turn
-            setTurn('X');    // Switch back to player's turn
+        const win = checkWinner(board)
+        if (!win) {
+            return
         }
-    }, [board, turn, isWinner]); // Dependencies to trigger AI after player's move
+    }, [board]); // Dependencies to trigger AI after player's move
 
     return (
         <div className="flex justify-center items-center min-h-screen">
@@ -47,7 +74,8 @@ function App() {
                 {board.map((value, index) => (
                     <div
                         key={index}
-                        className="p-2 w-[7rem] h-[7rem] border bg-white text-center cursor-pointer"
+                        className="p-2 w-[7rem] h-[7rem] border bg-white text-center cursor-pointer" 
+                        onClick={() => handleOnClick(index)}
                     >
                         <p className="text-[4rem]">{value}</p>
                     </div>
