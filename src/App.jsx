@@ -18,57 +18,135 @@ function App() {
     }
 
     const checkWinner = (gameBoard) => {
-        if (!gameBoard.includes('')) {
-            return 'Y'
-        }
 
         // horizontal win
         if (gameBoard[0] == gameBoard[1] && gameBoard[1] === gameBoard[2] && gameBoard[0] != '') {
-            return gameBoard[0]
+            return (gameBoard[0] == 'X' ? 10: -10)
         } else if (gameBoard[3] == gameBoard[4] && gameBoard[4] === gameBoard[5] && gameBoard[3] != '') {
-            return gameBoard[3]
+            return (gameBoard[3] == 'X' ? 10: -10)
         } else if (gameBoard[6] == gameBoard[7] && gameBoard[7] === gameBoard[8] && gameBoard[6] != '') {
-            return gameBoard[6]
+            return (gameBoard[6] == 'X' ? 10: -10)
         }
 
         // vertical win
         if (gameBoard[0] == gameBoard[3] && gameBoard[3] === gameBoard[6] && gameBoard[0] != '') {
-            return gameBoard[0]
+            return (gameBoard[0] == 'X' ? 10: -10)
         } else if (gameBoard[1] == gameBoard[4] && gameBoard[4] === gameBoard[7] && gameBoard[1] != '') {
-            return gameBoard[1]
+            return(gameBoard[1] == 'X' ? 10: -10)
         } else if (gameBoard[2] == gameBoard[5] && gameBoard[5] === gameBoard[8] && gameBoard[2] != '') {
-            return gameBoard[2]
+            return (gameBoard[2] == 'X' ? 10: -10)
         }
 
         // diagnal win 
         if (gameBoard[0] == gameBoard[4] && gameBoard[4] === gameBoard[8] && gameBoard[0] != '') {
-            return gameBoard[0]
+            return (gameBoard[0] == 'X' ? 10: -10)
         } else if (gameBoard[2] == gameBoard[4] && gameBoard[4] === gameBoard[6] && gameBoard[2] != '') {
-            return gameBoard[2]
+            return (gameBoard[2] == 'X' ? 10: -10)
         }
+
+        return 0
     }
 
-    // Use useEffect to automatically call AI after player makes a move
-    useEffect(() => {
-        const win = checkWinner(board)
-        if (!win) {
-            return
+    const minimax = (tempBoard, isMaximising) => {
+        let score = checkWinner(tempBoard);
+        if (score !== 0) return score;
+        if (!tempBoard.includes("")) return 0; // Draw
+
+        if (isMaximising) {
+            let best = -Infinity;
+            tempBoard.forEach((value, index) => {
+                if (value === "") {
+                    let newBoard = [...tempBoard]; // Copy board
+                    newBoard[index] = "X";
+                    best = Math.max(best, minimax(newBoard, false));
+                }
+            });
+            return best;
+        } else {
+            let best = Infinity;
+            tempBoard.forEach((value, index) => {
+                if (value === "") {
+                    let newBoard = [...tempBoard]; // Copy board
+                    newBoard[index] = "O";
+                    best = Math.min(best, minimax(newBoard, true));
+                }
+            });
+            return best;
         }
-    }, [board]); // Dependencies to trigger AI after player's move
+    };
+    
+    const findBestMove = (tempBoard) => {
+        let best = -Infinity
+        let bestMove = -1
+        
+        tempBoard.forEach((value, index) => {
+            if (value === '') {
+                let newBoard = [...tempBoard]; // Copy board
+                newBoard[index] = 'X';
+                let tempBest = minimax(newBoard, false);
+                
+                if (tempBest > best) {
+                    best = tempBest;
+                    bestMove = index;
+                }
+            }
+        })
+        return bestMove
+    }
+
+    useEffect(() => {
+        const win = checkWinner(board);
+        if (win === 10) {
+            setIsWinner(true);
+            setWinner("The winner is AI (X)");
+        } else if (win === -10) {
+            setIsWinner(true);
+            setWinner("The winner is Player (O)");
+        } else if (!board.includes("")) {
+            setIsWinner(true);
+            setWinner("It's a Draw");
+        } else if (turn === "X") {
+            // AI makes a move
+            if (!board.includes('X')) {
+                let randomMove = Math.floor(Math.random() * 8) + 1;
+                let tempBoard = [...board];
+                tempBoard[randomMove] = "X";
+                setBoard(tempBoard)
+                setTurn('O')
+            } else {
+                let bestMove = findBestMove(board);
+                if (bestMove !== -1) {
+                    let tempBoard = [...board];
+                    tempBoard[bestMove] = "X";
+                    setBoard(tempBoard);
+                    setTurn("O");
+                }
+            }
+        }
+    }, [turn]);
+
+    const handleRestart = () => {
+        setWinner("")
+        setIsWinner(false)
+        setBoard(Array(9).fill(''))
+        setTurn('X')
+    }
+    
 
     return (
-        <div className="flex justify-center items-center min-h-screen">
+        <div className="flex pt-20 items-center min-h-screen flex-col gap-4">
             {isWinner ? (
-                <div className="absolute bg-slate-300 w-[24rem] h-[10rem] flex justify-center items-center flex-col">
-                    <p>Winner {winner}!</p>{" "}
+                <div className=" bg-slate-300 w-[24rem] h-[10rem] flex justify-center items-center flex-col">
+                    <p>{winner}!</p>{" "}
                     <button
                         className="bg-blue-400 px-4 py-1 font-bold"
+                        onClick={handleRestart}
                     >
                         restart
                     </button>
                 </div>
             ) : (
-                <></>
+                <div className="h-[10rem]"></div>
             )}
             <div className="grid grid-cols-3 gap-2 bg-black rounded-lg p-2">
                 {board.map((value, index) => (
