@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Home = () => {
     return (
-        <div className="h-screen flex flex-col items-center justify-center md:pt-48">
+        <div className="h-screen flex flex-col items-center justify-center md:justify-start md:pt-48">
             <div>
                 <p className="text-4xl font-bold pb-14">TicTacToe</p>
             </div>

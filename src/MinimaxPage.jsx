@@ -196,7 +196,7 @@ function MinimaxPage() {
             >
                 <p>Restart game</p>
             </button>
-            <Link to={"/"} className="border border-black px-6 hover:bg-gray-300 duration-150 transition-colors rounded-sm">Back</Link>
+            <Link to={"/"} className="border border-black px-10 py-2 hover:bg-gray-300 duration-150 transition-colors rounded-sm md:px-14 md:py-1">Back</Link>
         </div>
     );
 }
