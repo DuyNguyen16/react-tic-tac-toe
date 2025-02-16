@@ -173,7 +173,7 @@ function MinimaxPage() {
     };
 
     return (
-        <div className="flex justify-center md:pt-40 items-center min-h-screen flex-col gap-4">
+        <div className="flex pt-20 md:pt-40 items-center min-h-screen flex-col gap-4">
             <div>
                 <p className="text-3xl font-bold pb-4">Human vs AI</p>
             </div>
